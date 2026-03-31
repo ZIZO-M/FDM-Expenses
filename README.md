@@ -199,3 +199,53 @@ JWT_SECRET="change-this-to-a-long-random-string"
 PORT=5001
 FRONTEND_URL="http://localhost:3000"
 ```
+## Getting Started
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18+)
+- [PostgreSQL](https://www.postgresql.org/) running locally
+
+### Installation
+
+1. **Clone the repository**
+```bash
+   git clone https://github.com/ZIZO-M/FDM-Expenses.git
+   cd FDM-Expenses
+```
+
+2. **Set up the backend**
+```bash
+   cd backend
+   npm install
+```
+   Create a `.env` file in the `backend/` folder:
+```
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/fdm_expenses"
+   JWT_SECRET="change-this-to-a-long-random-string"
+   PORT=5001
+   FRONTEND_URL="http://localhost:3000"
+```
+
+3. **Set up the frontend**
+```bash
+   cd ../frontend
+   npm install
+```
+
+4. **Run the app**
+
+   In one terminal (backend):
+```bash
+   cd backend
+   npm run dev
+```
+   In another terminal (frontend):
+```bash
+   cd frontend
+   npm run dev
+```
+
+5. **Open your browser**
+```
+   http://localhost:3000
+```
