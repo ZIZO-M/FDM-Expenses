@@ -309,7 +309,7 @@ export default function EditClaim() {
             padding: '20px',
             marginBottom: '20px',
           }}>
-            <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '14px', color: '#003366' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '14px', color: '#1a4d1a' }}>
               New Expense Item
             </div>
             {addItemError && <div className="alert alert-error">{addItemError}</div>}

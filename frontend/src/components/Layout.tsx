@@ -36,7 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside style={{
         width: '220px',
-        background: '#003366',
+        background: '#1a4d1a',
         color: '#fff',
         display: 'flex',
         flexDirection: 'column',
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   background: active ? 'rgba(255,255,255,0.12)' : 'transparent',
                   textDecoration: 'none',
                   fontSize: '14px',
-                  borderLeft: active ? '3px solid #4da6ff' : '3px solid transparent',
+                  borderLeft: active ? '3px solid #4dcc80' : '3px solid transparent',
                   transition: 'all 0.15s',
                 }}
               >

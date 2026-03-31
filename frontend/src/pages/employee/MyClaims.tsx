@@ -102,7 +102,7 @@ export default function MyClaims() {
                     <td className="amount">{fmt(claim.totalAmount, claim.currency)}</td>
                     <td><StatusBadge status={claim.status} /></td>
                     <td>
-                      <span style={{ color: '#0055a5', fontSize: '12px' }}>View →</span>
+                      <span style={{ color: '#1e7a3e', fontSize: '12px' }}>View →</span>
                     </td>
                   </tr>
                 ))}

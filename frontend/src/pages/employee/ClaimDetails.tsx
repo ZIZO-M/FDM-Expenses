@@ -70,7 +70,7 @@ export default function ClaimDetails() {
         <div>
           <Link
             to="/employee/claims"
-            style={{ color: '#0055a5', fontSize: '13px', textDecoration: 'none', display: 'block', marginBottom: '6px' }}
+            style={{ color: '#1e7a3e', fontSize: '13px', textDecoration: 'none', display: 'block', marginBottom: '6px' }}
           >
             ← Back to My Claims
           </Link>
@@ -124,7 +124,7 @@ export default function ClaimDetails() {
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '13px', color: '#6c757d', marginBottom: '4px' }}>Total Amount</div>
-            <div style={{ fontSize: '28px', fontWeight: 700, color: '#003366' }}>
+            <div style={{ fontSize: '28px', fontWeight: 700, color: '#1a4d1a' }}>
               {fmt(claim.totalAmount, claim.currency)}
             </div>
           </div>
@@ -309,7 +309,7 @@ export default function ClaimDetails() {
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: '#0055a5',
+                  background: '#1e7a3e',
                   flexShrink: 0,
                   marginTop: '5px',
                 }} />

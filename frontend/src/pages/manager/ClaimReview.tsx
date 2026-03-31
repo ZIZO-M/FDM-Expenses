@@ -89,7 +89,7 @@ export default function ClaimReview() {
         <div>
           <Link
             to="/manager/claims"
-            style={{ color: '#0055a5', fontSize: '13px', textDecoration: 'none', display: 'block', marginBottom: '6px' }}
+            style={{ color: '#1e7a3e', fontSize: '13px', textDecoration: 'none', display: 'block', marginBottom: '6px' }}
           >
             ← Back to Pending Claims
           </Link>
@@ -125,7 +125,7 @@ export default function ClaimReview() {
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '13px', color: '#6c757d', marginBottom: '4px' }}>Total Amount</div>
-            <div style={{ fontSize: '28px', fontWeight: 700, color: '#003366' }}>
+            <div style={{ fontSize: '28px', fontWeight: 700, color: '#1a4d1a' }}>
               {fmt(claim.totalAmount, claim.currency)}
             </div>
             <div style={{ fontSize: '13px', color: '#6c757d', marginTop: '4px' }}>
@@ -288,7 +288,7 @@ export default function ClaimReview() {
               >
                 <div style={{
                   width: '8px', height: '8px', borderRadius: '50%',
-                  background: '#0055a5', flexShrink: 0, marginTop: '5px',
+                  background: '#1e7a3e', flexShrink: 0, marginTop: '5px',
                 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>

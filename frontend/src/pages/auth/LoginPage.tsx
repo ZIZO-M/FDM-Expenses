@@ -30,7 +30,7 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #003366 0%, #0055a5 100%)',
+      background: 'linear-gradient(135deg, #1a4d1a 0%, #1e7a3e 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -45,7 +45,7 @@ export default function LoginPage() {
         boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '28px', fontWeight: 800, color: '#003366' }}>FDM</div>
+          <div style={{ fontSize: '28px', fontWeight: 800, color: '#1a4d1a' }}>FDM</div>
           <div style={{ fontSize: '16px', color: '#6c757d', marginTop: '4px' }}>Expenses Portal</div>
         </div>
 

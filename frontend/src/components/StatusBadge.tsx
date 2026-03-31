@@ -2,7 +2,7 @@ import { ClaimStatus } from '../types';
 
 const STATUS_STYLES: Record<ClaimStatus, { background: string; color: string; label: string }> = {
   DRAFT:             { background: '#e9ecef', color: '#495057', label: 'Draft' },
-  SUBMITTED:         { background: '#cfe2ff', color: '#0a58ca', label: 'Submitted' },
+  SUBMITTED:         { background: '#d4edda', color: '#155724', label: 'Submitted' },
   CHANGES_REQUESTED: { background: '#fff3cd', color: '#856404', label: 'Changes Requested' },
   APPROVED:          { background: '#d1e7dd', color: '#0f5132', label: 'Approved' },
   REJECTED:          { background: '#f8d7da', color: '#842029', label: 'Rejected' },

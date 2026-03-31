@@ -74,7 +74,7 @@ export default function ReimbursementProcessing() {
         <div>
           <Link
             to="/finance/claims"
-            style={{ color: '#0055a5', fontSize: '13px', textDecoration: 'none', display: 'block', marginBottom: '6px' }}
+            style={{ color: '#1e7a3e', fontSize: '13px', textDecoration: 'none', display: 'block', marginBottom: '6px' }}
           >
             ← Back to Approved Claims
           </Link>
@@ -110,7 +110,7 @@ export default function ReimbursementProcessing() {
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '13px', color: '#6c757d', marginBottom: '4px' }}>Total Amount</div>
-            <div style={{ fontSize: '32px', fontWeight: 700, color: '#003366' }}>
+            <div style={{ fontSize: '32px', fontWeight: 700, color: '#1a4d1a' }}>
               {fmt(claim.totalAmount, claim.currency)}
             </div>
           </div>

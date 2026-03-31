@@ -12,7 +12,7 @@ a { color: inherit; }
 /* ─── Utility ─────────────────────────────────────────── */
 .page-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 24px; }
 .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 24px; }
-.section-title { font-size: 15px; font-weight: 600; color: #003366; margin-bottom: 14px; }
+.section-title { font-size: 15px; font-weight: 600; color: #1a4d1a; margin-bottom: 14px; }
 
 /* ─── Buttons ─────────────────────────────────────────── */
 .btn {
@@ -26,12 +26,12 @@ a { color: inherit; }
 .btn:not(:disabled):hover { opacity: 0.88; }
 .btn:not(:disabled):active { transform: scale(0.98); }
 
-.btn-primary  { background: #0055a5; color: #fff; }
+.btn-primary  { background: #1e7a3e; color: #fff; }
 .btn-success  { background: #198754; color: #fff; }
 .btn-danger   { background: #dc3545; color: #fff; }
 .btn-warning  { background: #fd7e14; color: #fff; }
 .btn-secondary{ background: #6c757d; color: #fff; }
-.btn-outline  { background: transparent; color: #0055a5; border: 1px solid #0055a5; }
+.btn-outline  { background: transparent; color: #1e7a3e; border: 1px solid #1e7a3e; }
 .btn-sm       { padding: 5px 10px; font-size: 12px; }
 
 /* ─── Forms ───────────────────────────────────────────── */
@@ -48,8 +48,8 @@ a { color: inherit; }
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #0055a5;
-  box-shadow: 0 0 0 3px rgba(0,85,165,0.12);
+  border-color: #1e7a3e;
+  box-shadow: 0 0 0 3px rgba(30,122,62,0.12);
 }
 .form-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
 
@@ -81,7 +81,7 @@ tr:hover td { background: #fafbfc; }
 .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; }
 .filter-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid #dee2e6; background: #fff; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.15s; }
-.filter-btn.active { background: #003366; color: #fff; border-color: #003366; }
+.filter-btn.active { background: #1a4d1a; color: #fff; border-color: #1a4d1a; }
 .divider { height: 1px; background: #f0f0f0; margin: 20px 0; }
 .text-muted { color: #6c757d; font-size: 13px; }
 .text-right { text-align: right; }
