@@ -1,6 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "windows"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -112,8 +111,8 @@ model Reimbursement {
 }
 
 model AuditLog {
-  logId     String       @id @default(cuid())
-  timestamp DateTime     @default(now())
+  logId     String      @id @default(cuid())
+  timestamp DateTime    @default(now())
   action    String
   oldStatus ClaimStatus?
   newStatus ClaimStatus?
