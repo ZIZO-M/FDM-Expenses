@@ -71,14 +71,6 @@ export default function FinanceClaimsDashboard() {
     }
   };
 
-  const getApprovedDate = (claim: ExpenseClaim): string => {
-    if (!claim.decisions || claim.decisions.length === 0) return '—';
-    const approved = claim.decisions
-      .filter((d) => d.decisionType === 'APPROVED')
-      .sort((a, b) => new Date(b.decidedAt).getTime() - new Date(a.decidedAt).getTime())[0];
-    return approved ? formatDate(approved.decidedAt) : '—';
-  };
-
   const handleViewClaim = (claim: ExpenseClaim) => {
     navigate(`/finance/claims/${claim.claimId}`);
   };
@@ -152,7 +144,6 @@ export default function FinanceClaimsDashboard() {
                   <th>Employee</th>
                   <th>Cost Centre</th>
                   <th>Submitted</th>
-                  <th>Approved</th>
                   <th>Total</th>
                   <th>Status</th>
                   <th>Items</th>
@@ -175,7 +166,6 @@ export default function FinanceClaimsDashboard() {
                     </td>
                     <td>{claim.employee?.costCentre ?? '—'}</td>
                     <td>{claim.submittedAt ? formatDate(claim.submittedAt) : '—'}</td>
-                    <td>{getApprovedDate(claim)}</td>
                     <td className="amount">{formatMoney(claim.totalAmount, claim.currency)}</td>
                     <td>{getStatusText(claim.status)}</td>
                     <td>{claim.items.length}</td>

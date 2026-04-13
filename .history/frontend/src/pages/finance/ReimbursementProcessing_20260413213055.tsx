@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import './ProcessReimbursement.css';
 import * as api from '../../services/api';
 import { ExpenseClaim } from '../../types';
 
@@ -69,7 +70,7 @@ export default function ProcessReimbursement() {
   };
 
   if (loading) {
-    return <div className="loading">Loading claim details...</div>;
+    return <div className="loading-container">Loading claim details...</div>;
   }
 
   if (!claim) {
@@ -79,71 +80,69 @@ export default function ProcessReimbursement() {
   const approvedDecision = claim.decisions?.find(d => d.decisionType === 'APPROVED');
 
   return (
-    <>
-      <div className="top-bar">
+    <div className="reimbursement-container">
+      <div className="reimbursement-header">
         <div>
-          <Link to="/finance/claims" style={{ color: '#1e7a3e', fontSize: '13px', textDecoration: 'none' }}>
+          <Link to="/finance/claims" className="back-link">
             ← Back to Dashboard
           </Link>
-          <h1 className="page-title" style={{ marginTop: '8px', marginBottom: 0 }}>
-            Process Reimbursement
-          </h1>
-          <div className="text-muted" style={{ fontSize: '13px', marginTop: '4px' }}>
-            Claim ID: {claim.claimId}
-          </div>
+          <h1>Process Reimbursement</h1>
+          <p className="claim-id-ref">Claim ID: {claim.claimId}</p>
         </div>
-        <span className="amount" style={{ fontSize: '24px' }}>
-          {formatMoney(claim.totalAmount, claim.currency)}
+        <span className={`status-pill ${claim.status}`}>
+          {claim.status}
         </span>
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <div className="alert-error">{error}</div>}
 
       {/* Claim Summary */}
-      <div className="card" style={{ marginBottom: '20px' }}>
-        <div className="section-title">Claim Summary</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-          <div>
-            <div className="text-muted" style={{ fontSize: '12px' }}>Employee</div>
-            <div style={{ fontWeight: 500 }}>{claim.employee?.fullName ?? '—'}</div>
+      <div className="summary-card">
+        <h3 className="section-title">Claim Summary</h3>
+        <div className="summary-grid">
+          <div className="summary-item">
+            <span className="summary-label">Employee</span>
+            <span className="summary-value">{claim.employee?.fullName ?? '—'}</span>
           </div>
-          <div>
-            <div className="text-muted" style={{ fontSize: '12px' }}>Email</div>
-            <div>{claim.employee?.email ?? '—'}</div>
+          <div className="summary-item">
+            <span className="summary-label">Email</span>
+            <span className="summary-value">{claim.employee?.email ?? '—'}</span>
           </div>
-          <div>
-            <div className="text-muted" style={{ fontSize: '12px' }}>Cost Centre</div>
-            <div>{claim.employee?.costCentre ?? '—'}</div>
+          <div className="summary-item">
+            <span className="summary-label">Cost Centre</span>
+            <span className="summary-value">{claim.employee?.costCentre ?? '—'}</span>
           </div>
-          <div>
-            <div className="text-muted" style={{ fontSize: '12px' }}>Submitted</div>
-            <div>{claim.submittedAt ? formatDate(claim.submittedAt) : '—'}</div>
+          <div className="summary-item">
+            <span className="summary-label">Submitted</span>
+            <span className="summary-value">{claim.submittedAt ? formatDate(claim.submittedAt) : '—'}</span>
           </div>
         </div>
-        
+        <div className="total-box">
+          <div className="total-label-small">Total Amount</div>
+          <div className="total-amount-large">
+            {formatMoney(claim.totalAmount, claim.currency)}
+          </div>
+        </div>
         {claim.employeeComment && (
-          <>
-            <div className="divider"></div>
-            <div style={{ marginTop: '16px' }}>
-              <div className="text-muted" style={{ fontSize: '12px', fontWeight: 600 }}>Employee Notes</div>
-              <p style={{ marginTop: '8px', fontSize: '14px' }}>{claim.employeeComment}</p>
-            </div>
-          </>
+          <div className="employee-notes">
+            <div className="notes-heading">EMPLOYEE NOTES</div>
+            <p className="notes-text">{claim.employeeComment}</p>
+          </div>
         )}
       </div>
 
       {/* Manager Approval */}
       {approvedDecision && (
-        <div className="card" style={{ marginBottom: '20px', borderLeft: '4px solid #198754' }}>
-          <div className="section-title">✓ Manager Approval</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', fontSize: '13px' }}>
+        <div className="approval-card">
+          <h3 className="section-title">✓ Manager Approval</h3>
+          <div className="approval-grid">
             <span className="text-muted">Approved by:</span>
-            <span style={{ fontWeight: 500 }}>{approvedDecision.manager.fullName}</span>
+            <span className="summary-value">{approvedDecision.manager.fullName}</span>
             <span className="text-muted">Approved on:</span>
             <span>{formatDateTime(approvedDecision.decidedAt)}</span>
           </div>
           {approvedDecision.comment && (
-            <div style={{ marginTop: '12px', padding: '10px', background: '#f8f9fa', borderRadius: '6px', fontSize: '13px' }}>
+            <div className="approval-comment">
               <strong>Comment:</strong> {approvedDecision.comment}
             </div>
           )}
@@ -151,10 +150,10 @@ export default function ProcessReimbursement() {
       )}
 
       {/* Expense Items */}
-      <div className="card" style={{ marginBottom: '20px' }}>
-        <div className="section-title">Expense Items ({claim.items.length})</div>
+      <div className="items-card">
+        <h3 className="section-title">Expense Items ({claim.items.length})</h3>
         <div className="table-wrap">
-          <table>
+          <table className="items-table">
             <thead>
               <tr>
                 <th>Date</th>
@@ -170,48 +169,49 @@ export default function ProcessReimbursement() {
               {claim.items.map((item) => (
                 <tr key={item.itemId}>
                   <td>{formatDate(item.dateIncurred)}</td>
-                  <td>
-                    <span style={{ background: '#e9ecef', padding: '2px 8px', borderRadius: '12px', fontSize: '11px' }}>
-                      {item.category}
-                    </span>
-                  </td>
+                  <td><span className="category-tag">{item.category}</span></td>
                   <td>{item.description}</td>
                   <td>{item.merchant}</td>
                   <td className="amount">{formatMoney(item.amount, item.currency)}</td>
                   <td className="amount">{formatMoney(item.vatAmount, item.currency)}</td>
                   <td>
                     {item.receipts.length > 0 ? (
-                      <span style={{ color: '#1e7a3e', fontSize: '12px' }}>✓ {item.receipts[0].fileName}</span>
+                      <span className="receipt-item">✓ {item.receipts[0].fileName}</span>
                     ) : (
-                      <span style={{ color: '#dc3545', fontSize: '12px' }}>❌ Missing</span>
+                      <span className="no-receipt">❌ Missing receipt</span>
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={4}></td>
+                <td className="table-total-label">Total:</td>
+                <td className="table-total-amount amount" colSpan={2}>
+                  {formatMoney(claim.totalAmount, claim.currency)}
+                </td>
+              </tr>
+            </tfoot>
           </table>
-        </div>
-        <div className="text-right" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f0f0f0' }}>
-          <span className="text-muted">Total: </span>
-          <span className="amount" style={{ fontSize: '18px' }}>{formatMoney(claim.totalAmount, claim.currency)}</span>
         </div>
       </div>
 
       {/* Payment Section */}
       {processed || claim.status === 'PAID' ? (
-        <div className="card" style={{ borderLeft: '4px solid #198754' }}>
-          <div className="section-title" style={{ color: '#0f5132' }}>✓ Reimbursement Complete</div>
-          <div className="alert alert-success">Claim has been marked as PAID.</div>
-          <div style={{ marginTop: '16px' }}>
+        <div className="paid-card">
+          <h3 className="section-title">✓ Reimbursement Complete</h3>
+          <div className="alert-success">Claim has been marked as PAID.</div>
+          <div className="payment-info">
             <p><strong>Payment Reference:</strong> {claim.reimbursement?.paymentReference || paymentRef || 'N/A'}</p>
             <p><strong>Finance Notes:</strong> {claim.financeComment || notes || 'None'}</p>
           </div>
         </div>
       ) : (
-        <div className="card">
-          <div className="section-title">Process Payment</div>
+        <div className="payment-card">
+          <h3 className="section-title">Process Payment</h3>
           
-          <div className="alert alert-info">
+          <div className="alert-info">
             This will mark the claim as <strong>PAID</strong> and notify the employee.
           </div>
 
@@ -238,14 +238,12 @@ export default function ProcessReimbursement() {
               />
             </div>
 
-            <div className="flex-end">
-              <button type="submit" className="btn btn-success" disabled={processing}>
-                {processing ? 'Processing...' : `Confirm Payment — ${formatMoney(claim.totalAmount, claim.currency)}`}
-              </button>
-            </div>
+            <button type="submit" className="btn-success" disabled={processing}>
+              {processing ? 'Processing...' : `Confirm Payment — ${formatMoney(claim.totalAmount, claim.currency)}`}
+            </button>
           </form>
         </div>
       )}
-    </>
+    </div>
   );
 }
