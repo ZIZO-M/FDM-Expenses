@@ -5,7 +5,6 @@ import fs from 'fs';
 import { authenticate } from '../middleware/auth';
 import * as claimsController from '../controllers/claims.controller';
 
-// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -21,7 +20,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
     if (allowed.includes(file.mimetype)) {
@@ -33,25 +32,22 @@ const upload = multer({
 });
 
 const router = Router();
+
 router.use(authenticate);
 
-// Claims CRUD
 router.get('/', claimsController.getMyClaims);
 router.post('/', claimsController.createClaim);
 router.get('/:claimId', claimsController.getClaim);
 router.put('/:claimId', claimsController.updateClaim);
 router.delete('/:claimId', claimsController.deleteClaim);
 
-// Claim lifecycle
 router.post('/:claimId/submit', claimsController.submitClaim);
 router.post('/:claimId/withdraw', claimsController.withdrawClaim);
 
-// Expense items
 router.post('/:claimId/items', claimsController.addItem);
 router.put('/items/:itemId', claimsController.updateItem);
 router.delete('/items/:itemId', claimsController.deleteItem);
 
-// Receipts
 router.post('/items/:itemId/receipts', upload.single('receipt'), claimsController.uploadReceipt);
 router.delete('/receipts/:receiptId', claimsController.deleteReceipt);
 
