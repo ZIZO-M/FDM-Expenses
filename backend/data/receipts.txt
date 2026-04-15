@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "receiptId": "8c3022cb-1cde-4583-a979-89d4653880a7",
+    "itemId": "71d8e9e6-81c8-4dd9-84cc-c30f1a1d397e",
+    "fileName": "Screenshot 2026-04-15 at 00.47.46.png",
+    "fileType": "image/png",
+    "filePath": "/Users/zizo/Desktop/FDM-Expenses/backend/uploads/1776256281786-332671372-Screenshot 2026-04-15 at 00.47.46.png",
+    "uploadDate": "2026-04-15T12:31:21.796Z",
+    "vatNumber": null,
+    "totalOnReceipt": null
+  }
+]

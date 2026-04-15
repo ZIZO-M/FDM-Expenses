@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "itemId": "71d8e9e6-81c8-4dd9-84cc-c30f1a1d397e",
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "dateIncurred": "2026-04-15",
+    "category": "Meals",
+    "description": "food",
+    "amount": 100,
+    "currency": "GBP",
+    "vatAmount": 20,
+    "merchant": "tesco"
+  }
+]

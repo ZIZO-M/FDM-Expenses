@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "employeeId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
+    "status": "PAID",
+    "totalAmount": 100,
+    "currency": "GBP",
+    "employeeComment": "project code 'abc'",
+    "managerComment": null,
+    "financeComment": null,
+    "createdAt": "2026-04-15T12:30:56.675Z",
+    "submittedAt": "2026-04-15T12:31:29.714Z"
+  }
+]

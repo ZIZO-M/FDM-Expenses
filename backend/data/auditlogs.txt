@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "logId": "e5b788d9-adb1-42a7-8c17-b3bd53807c23",
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "actorId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
+    "action": "SUBMITTED",
+    "oldStatus": "DRAFT",
+    "newStatus": "SUBMITTED",
+    "comment": null,
+    "timestamp": "2026-04-15T12:31:29.715Z"
+  },
+  {
+    "logId": "0cc88e49-371d-44a9-8fa8-c11ea7c2b2b1",
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "actorId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",
+    "action": "APPROVED",
+    "oldStatus": "SUBMITTED",
+    "newStatus": "APPROVED",
+    "comment": null,
+    "timestamp": "2026-04-15T12:31:47.333Z"
+  },
+  {
+    "logId": "42137712-f032-477e-9b43-7e79be284678",
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "actorId": "0e8a2f33-a465-40df-a8f0-3cb70c604ef9",
+    "action": "PAID",
+    "oldStatus": "APPROVED",
+    "newStatus": "PAID",
+    "comment": null,
+    "timestamp": "2026-04-15T12:32:10.031Z"
+  }
+]

@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "reimbursementId": "ce92cddd-8b10-4737-b3b8-8967d55e9faf",
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "financeOfficerId": "0e8a2f33-a465-40df-a8f0-3cb70c604ef9",
+    "processedAt": "2026-04-15T12:32:10.031Z",
+    "paidAt": "2026-04-15T12:32:10.031Z",
+    "paymentReference": null,
+    "amountPaid": 100,
+    "currency": "GBP"
+  }
+]

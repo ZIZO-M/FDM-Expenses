@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "decisionId": "d2351c98-8e6e-415d-b6a6-e5368d71c6f9",
+    "claimId": "8c782f74-b1f4-4935-99a3-1b0f771584c2",
+    "managerId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",
+    "decisionType": "APPROVED",
+    "decidedAt": "2026-04-15T12:31:47.332Z",
+    "comment": null
+  }
+]
