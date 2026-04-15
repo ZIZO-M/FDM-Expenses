@@ -28,5 +28,15 @@
     "newStatus": "PAID",
     "comment": null,
     "timestamp": "2026-04-15T12:32:10.031Z"
+  },
+  {
+    "logId": "f3472d7f-26a0-4465-9eda-2e35abba661f",
+    "claimId": "147e8fd9-7ec0-48a8-97fc-f91e40314a2c",
+    "actorId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
+    "action": "SUBMITTED",
+    "oldStatus": "DRAFT",
+    "newStatus": "SUBMITTED",
+    "comment": null,
+    "timestamp": "2026-04-15T16:51:02.976Z"
   }
 ]

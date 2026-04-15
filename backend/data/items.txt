@@ -9,5 +9,16 @@
     "currency": "GBP",
     "vatAmount": 20,
     "merchant": "tesco"
+  },
+  {
+    "itemId": "6496c549-6ba7-4232-a329-c2f015ecc2d4",
+    "claimId": "147e8fd9-7ec0-48a8-97fc-f91e40314a2c",
+    "dateIncurred": "2026-04-15",
+    "category": "Meals",
+    "description": "askjdnask",
+    "amount": 1000.4,
+    "currency": "GBP",
+    "vatAmount": 20,
+    "merchant": "haskjdhkas"
   }
 ]

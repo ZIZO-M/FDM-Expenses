@@ -8,5 +8,15 @@
     "uploadDate": "2026-04-15T12:31:21.796Z",
     "vatNumber": null,
     "totalOnReceipt": null
+  },
+  {
+    "receiptId": "75d964fc-8775-45c6-892b-2611c8efa922",
+    "itemId": "6496c549-6ba7-4232-a329-c2f015ecc2d4",
+    "fileName": "Screenshot 2026-04-15 at 00.47.46.png",
+    "fileType": "image/png",
+    "filePath": "/Users/zizo/Desktop/FDM-Expenses/backend/uploads/1776271856878-304352172-Screenshot 2026-04-15 at 00.47.46.png",
+    "uploadDate": "2026-04-15T16:50:56.888Z",
+    "vatNumber": null,
+    "totalOnReceipt": null
   }
 ]

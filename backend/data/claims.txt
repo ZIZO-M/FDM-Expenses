@@ -10,5 +10,17 @@
     "financeComment": null,
     "createdAt": "2026-04-15T12:30:56.675Z",
     "submittedAt": "2026-04-15T12:31:29.714Z"
+  },
+  {
+    "claimId": "147e8fd9-7ec0-48a8-97fc-f91e40314a2c",
+    "employeeId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
+    "status": "SUBMITTED",
+    "totalAmount": 1000.4,
+    "currency": "GBP",
+    "employeeComment": "sfiuhdiuf",
+    "managerComment": null,
+    "financeComment": null,
+    "createdAt": "2026-04-15T16:50:29.342Z",
+    "submittedAt": "2026-04-15T16:51:02.975Z"
   }
 ]

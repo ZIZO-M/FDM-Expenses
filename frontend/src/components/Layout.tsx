@@ -10,15 +10,10 @@ const NAV_BY_ROLE = {
   ],
   LINE_MANAGER: [
     { label: 'Dashboard',      path: '/dashboard',           icon: '⊞' },
-    { label: 'My Claims',      path: '/employee/claims',     icon: '📋' },
-    { label: 'New Claim',      path: '/employee/claims/new', icon: '＋' },
     { label: 'Pending Reviews',path: '/manager/claims',      icon: '🔍' },
   ],
   FINANCE_OFFICER: [
     { label: 'Dashboard',      path: '/dashboard',           icon: '⊞' },
-    { label: 'My Claims',      path: '/employee/claims',     icon: '📋' },
-    { label: 'New Claim',      path: '/employee/claims/new', icon: '＋' },
-    { label: 'Pending Reviews',path: '/manager/claims',      icon: '🔍' },
     { label: 'Approved Claims',path: '/finance/claims',      icon: '💳' },
   ],
 };
