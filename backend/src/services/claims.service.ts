@@ -1,43 +1,67 @@
-import prisma from '../lib/prisma';
-import { ClaimStatus } from '@prisma/client';
+import { db, newId, ClaimStatus } from '../lib/db';
 
-const CLAIM_INCLUDE = {
-  items: { include: { receipts: true } },
-  decisions: {
-    include: { manager: { select: { fullName: true } } },
-    orderBy: { decidedAt: 'desc' as const },
-  },
-  auditLogs: { orderBy: { timestamp: 'desc' as const } },
-};
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function withItems(claim: ReturnType<typeof db.claims.byId>) {
+  if (!claim) return null;
+  const items = db.items.byClaim(claim.claimId).map((item) => ({
+    ...item,
+    receipts: db.receipts.byItem(item.itemId),
+  }));
+  return { ...claim, items };
+}
+
+function fullClaim(claim: ReturnType<typeof db.claims.byId>) {
+  if (!claim) return null;
+  const items = db.items.byClaim(claim.claimId).map((item) => ({
+    ...item,
+    receipts: db.receipts.byItem(item.itemId),
+  }));
+  const decisions = db.decisions
+    .byClaim(claim.claimId)
+    .sort((a, b) => new Date(b.decidedAt).getTime() - new Date(a.decidedAt).getTime())
+    .map((d) => {
+      const manager = db.employees.byId(d.managerId);
+      return { ...d, manager: manager ? { fullName: manager.fullName } : null };
+    });
+  const auditLogs = db.auditlogs
+    .byClaim(claim.claimId)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  return { ...claim, items, decisions, auditLogs };
+}
+
+// ── Employee claim operations ─────────────────────────────────────────────────
 
 export async function getEmployeeClaims(employeeId: string) {
-  return prisma.expenseClaim.findMany({
-    where: { employeeId },
-    include: { items: { include: { receipts: true } } },
-    orderBy: { createdAt: 'desc' },
-  });
+  return db.claims
+    .byEmployee(employeeId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .map((claim) => withItems(claim));
 }
 
 export async function createClaim(
   employeeId: string,
   data: { currency?: string; employeeComment?: string }
 ) {
-  return prisma.expenseClaim.create({
-    data: {
-      employeeId,
-      currency: data.currency || 'GBP',
-      employeeComment: data.employeeComment,
-    },
+  const claim = db.claims.insert({
+    claimId: newId(),
+    employeeId,
+    status: 'DRAFT',
+    totalAmount: 0,
+    currency: data.currency || 'GBP',
+    employeeComment: data.employeeComment ?? null,
+    managerComment: null,
+    financeComment: null,
+    createdAt: new Date().toISOString(),
+    submittedAt: null,
   });
+  return claim;
 }
 
 export async function getClaimById(claimId: string, employeeId: string) {
-  const claim = await prisma.expenseClaim.findFirst({
-    where: { claimId, employeeId },
-    include: CLAIM_INCLUDE,
-  });
-  if (!claim) throw new Error('Claim not found');
-  return claim;
+  const claim = db.claims.byId(claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
+  return fullClaim(claim);
 }
 
 export async function updateClaim(
@@ -45,84 +69,83 @@ export async function updateClaim(
   employeeId: string,
   data: { employeeComment?: string; currency?: string }
 ) {
-  const claim = await prisma.expenseClaim.findFirst({ where: { claimId, employeeId } });
-  if (!claim) throw new Error('Claim not found');
+  const claim = db.claims.byId(claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
   if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
     throw new Error('Cannot edit a claim in its current status');
   }
-  return prisma.expenseClaim.update({
-    where: { claimId },
-    data: { employeeComment: data.employeeComment, currency: data.currency },
+  return db.claims.update(claimId, {
+    employeeComment: data.employeeComment ?? claim.employeeComment,
+    currency: data.currency ?? claim.currency,
   });
 }
 
 export async function submitClaim(claimId: string, employeeId: string) {
-  const claim = await prisma.expenseClaim.findFirst({
-    where: { claimId, employeeId },
-    include: { items: { include: { receipts: true } } },
-  });
-  if (!claim) throw new Error('Claim not found');
+  const claim = db.claims.byId(claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
   if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
     throw new Error('Cannot submit a claim in its current status');
   }
-  if (claim.items.length === 0) {
+  const items = db.items.byClaim(claimId);
+  if (items.length === 0) {
     throw new Error('Claim must have at least one expense item before submission');
   }
-  const itemWithoutReceipt = claim.items.find((item) => item.receipts.length === 0);
+  const itemWithoutReceipt = items.find((item) => db.receipts.byItem(item.itemId).length === 0);
   if (itemWithoutReceipt) {
     throw new Error(`Expense item "${itemWithoutReceipt.description}" is missing a receipt`);
   }
-
-  const total = claim.items.reduce((sum, item) => sum + item.amount, 0);
+  const total = items.reduce((sum, item) => sum + item.amount, 0);
   const oldStatus = claim.status;
 
-  return prisma.$transaction([
-    prisma.expenseClaim.update({
-      where: { claimId },
-      data: { status: 'SUBMITTED', submittedAt: new Date(), totalAmount: total },
-    }),
-    prisma.auditLog.create({
-      data: {
-        claimId,
-        action: 'SUBMITTED',
-        oldStatus: oldStatus as ClaimStatus,
-        newStatus: 'SUBMITTED',
-        actorId: employeeId,
-      },
-    }),
-  ]);
+  db.claims.update(claimId, {
+    status: 'SUBMITTED',
+    submittedAt: new Date().toISOString(),
+    totalAmount: total,
+  });
+  db.auditlogs.insert({
+    logId: newId(),
+    claimId,
+    actorId: employeeId,
+    action: 'SUBMITTED',
+    oldStatus: oldStatus as ClaimStatus,
+    newStatus: 'SUBMITTED',
+    comment: null,
+    timestamp: new Date().toISOString(),
+  });
 }
 
 export async function withdrawClaim(claimId: string, employeeId: string) {
-  const claim = await prisma.expenseClaim.findFirst({ where: { claimId, employeeId } });
-  if (!claim) throw new Error('Claim not found');
+  const claim = db.claims.byId(claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
   if (!['SUBMITTED', 'CHANGES_REQUESTED', 'DRAFT'].includes(claim.status)) {
     throw new Error('Cannot withdraw a claim in its current status');
   }
-  if (claim.status === 'APPROVED' || claim.status === 'PAID') {
-    throw new Error('Cannot withdraw an approved or paid claim');
-  }
 
-  return prisma.$transaction([
-    prisma.expenseClaim.update({ where: { claimId }, data: { status: 'WITHDRAWN' } }),
-    prisma.auditLog.create({
-      data: {
-        claimId,
-        action: 'WITHDRAWN',
-        oldStatus: claim.status as ClaimStatus,
-        newStatus: 'WITHDRAWN',
-        actorId: employeeId,
-      },
-    }),
-  ]);
+  db.claims.update(claimId, { status: 'WITHDRAWN' });
+  db.auditlogs.insert({
+    logId: newId(),
+    claimId,
+    actorId: employeeId,
+    action: 'WITHDRAWN',
+    oldStatus: claim.status as ClaimStatus,
+    newStatus: 'WITHDRAWN',
+    comment: null,
+    timestamp: new Date().toISOString(),
+  });
 }
 
 export async function deleteClaim(claimId: string, employeeId: string) {
-  const claim = await prisma.expenseClaim.findFirst({ where: { claimId, employeeId } });
-  if (!claim) throw new Error('Claim not found');
+  const claim = db.claims.byId(claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
   if (claim.status !== 'DRAFT') throw new Error('Only draft claims can be deleted');
-  return prisma.expenseClaim.delete({ where: { claimId } });
+
+  // Cascade: delete receipts → items → claim
+  db.items.byClaim(claimId).forEach((item) => db.receipts.deleteByItem(item.itemId));
+  db.items.deleteByClaim(claimId);
+  db.claims.delete(claimId);
 }
+
+// ── Items ─────────────────────────────────────────────────────────────────────
 
 export async function addItem(
   claimId: string,
@@ -137,22 +160,21 @@ export async function addItem(
     merchant: string;
   }
 ) {
-  const claim = await prisma.expenseClaim.findFirst({ where: { claimId, employeeId } });
-  if (!claim) throw new Error('Claim not found');
+  const claim = db.claims.byId(claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
   if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
     throw new Error('Cannot add items to a claim in its current status');
   }
-  return prisma.expenseItem.create({
-    data: {
-      claimId,
-      dateIncurred: new Date(data.dateIncurred),
-      category: data.category,
-      description: data.description,
-      amount: Number(data.amount),
-      currency: data.currency || 'GBP',
-      vatAmount: Number(data.vatAmount || 0),
-      merchant: data.merchant,
-    },
+  return db.items.insert({
+    itemId: newId(),
+    claimId,
+    dateIncurred: data.dateIncurred,
+    category: data.category,
+    description: data.description,
+    amount: Number(data.amount),
+    currency: data.currency || 'GBP',
+    vatAmount: Number(data.vatAmount || 0),
+    merchant: data.merchant,
   });
 }
 
@@ -169,36 +191,70 @@ export async function updateItem(
     merchant: string;
   }>
 ) {
-  const item = await prisma.expenseItem.findFirst({
-    where: { itemId },
-    include: { claim: true },
-  });
-  if (!item || item.claim.employeeId !== employeeId) throw new Error('Item not found');
-  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(item.claim.status)) {
+  const item = db.items.byId(itemId);
+  if (!item) throw new Error('Item not found');
+  const claim = db.claims.byId(item.claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Item not found');
+  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
     throw new Error('Cannot edit items in this claim status');
   }
-  return prisma.expenseItem.update({
-    where: { itemId },
-    data: {
-      dateIncurred: data.dateIncurred ? new Date(data.dateIncurred) : undefined,
-      category: data.category,
-      description: data.description,
-      amount: data.amount !== undefined ? Number(data.amount) : undefined,
-      currency: data.currency,
-      vatAmount: data.vatAmount !== undefined ? Number(data.vatAmount) : undefined,
-      merchant: data.merchant,
-    },
+  return db.items.update(itemId, {
+    dateIncurred: data.dateIncurred ?? item.dateIncurred,
+    category: data.category ?? item.category,
+    description: data.description ?? item.description,
+    amount: data.amount !== undefined ? Number(data.amount) : item.amount,
+    currency: data.currency ?? item.currency,
+    vatAmount: data.vatAmount !== undefined ? Number(data.vatAmount) : item.vatAmount,
+    merchant: data.merchant ?? item.merchant,
   });
 }
 
 export async function deleteItem(itemId: string, employeeId: string) {
-  const item = await prisma.expenseItem.findFirst({
-    where: { itemId },
-    include: { claim: true },
-  });
-  if (!item || item.claim.employeeId !== employeeId) throw new Error('Item not found');
-  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(item.claim.status)) {
+  const item = db.items.byId(itemId);
+  if (!item) throw new Error('Item not found');
+  const claim = db.claims.byId(item.claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Item not found');
+  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
     throw new Error('Cannot delete items in this claim status');
   }
-  return prisma.expenseItem.delete({ where: { itemId } });
+  db.receipts.deleteByItem(itemId);
+  db.items.delete(itemId);
+}
+
+// ── Receipts ──────────────────────────────────────────────────────────────────
+
+export async function createReceipt(
+  itemId: string,
+  employeeId: string,
+  file: Express.Multer.File,
+  vatNumber?: string,
+  totalOnReceipt?: number
+) {
+  const item = db.items.byId(itemId);
+  if (!item) throw new Error('Item not found');
+  const claim = db.claims.byId(item.claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Item not found');
+  if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
+    throw new Error('Cannot upload receipts in this claim status');
+  }
+  return db.receipts.insert({
+    receiptId: newId(),
+    itemId,
+    fileName: file.originalname,
+    fileType: file.mimetype,
+    filePath: file.path,
+    uploadDate: new Date().toISOString(),
+    vatNumber: vatNumber ?? null,
+    totalOnReceipt: totalOnReceipt ?? null,
+  });
+}
+
+export async function deleteReceipt(receiptId: string, employeeId: string) {
+  const receipt = db.receipts.byId(receiptId);
+  if (!receipt) throw new Error('Receipt not found');
+  const item = db.items.byId(receipt.itemId);
+  if (!item) throw new Error('Receipt not found');
+  const claim = db.claims.byId(item.claimId);
+  if (!claim || claim.employeeId !== employeeId) throw new Error('Receipt not found');
+  db.receipts.delete(receiptId);
 }

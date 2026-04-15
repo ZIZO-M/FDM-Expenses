@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import * as claimsService from '../services/claims.service';
-import prisma from '../lib/prisma';
 
 // view claims
 export async function getMyClaims(req: AuthRequest, res: Response): Promise<void> {
@@ -143,37 +142,13 @@ export async function uploadReceipt(req: AuthRequest, res: Response): Promise<vo
       res.status(400).json({ error: 'No file uploaded' });
       return;
     }
-
-    const item = await prisma.expenseItem.findFirst({
-      where: { itemId: req.params.itemId },
-      include: { claim: true },
-    });
-
-    if (!item || item.claim.employeeId !== req.user!.employeeId) {
-      res.status(404).json({ error: 'Item not found' });
-      return;
-    }
-
-    if (!['DRAFT', 'CHANGES_REQUESTED'].includes(item.claim.status)) {
-      res.status(400).json({
-        error: 'Cannot upload receipts in this claim status',
-      });
-      return;
-    }
-
-    const receipt = await prisma.receipt.create({
-      data: {
-        itemId: req.params.itemId,
-        fileName: req.file.originalname,
-        fileType: req.file.mimetype,
-        filePath: req.file.path,
-        vatNumber: req.body.vatNumber || null,
-        totalOnReceipt: req.body.totalOnReceipt
-          ? parseFloat(req.body.totalOnReceipt)
-          : null,
-      },
-    });
-
+    const receipt = await claimsService.createReceipt(
+      req.params.itemId,
+      req.user!.employeeId,
+      req.file,
+      req.body.vatNumber || undefined,
+      req.body.totalOnReceipt ? parseFloat(req.body.totalOnReceipt) : undefined
+    );
     res.status(201).json(receipt);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error uploading receipt';
@@ -184,18 +159,7 @@ export async function uploadReceipt(req: AuthRequest, res: Response): Promise<vo
 // delete receipt
 export async function deleteReceipt(req: AuthRequest, res: Response): Promise<void> {
   try {
-    const receipt = await prisma.receipt.findFirst({
-      where: { receiptId: req.params.receiptId },
-      include: { item: { include: { claim: true } } },
-    });
-
-    if (!receipt || receipt.item.claim.employeeId !== req.user!.employeeId) {
-      res.status(404).json({ error: 'Receipt not found' });
-      return;
-    }
-
-    await prisma.receipt.delete({ where: { receiptId: req.params.receiptId } });
-
+    await claimsService.deleteReceipt(req.params.receiptId, req.user!.employeeId);
     res.status(200).json({ message: 'Receipt deleted successfully' });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error deleting receipt';

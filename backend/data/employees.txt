@@ -1,0 +1,29 @@
+[
+  {
+    "employeeId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
+    "fullName": "Alice Johnson",
+    "email": "employee@fdm.com",
+    "passwordHash": "$2a$10$7AVKEeae7sdljXmRKvAJI.myn6B7Nwe.Q6QHauPugagTgryCw5aVa",
+    "role": "EMPLOYEE",
+    "costCentre": "CC-001",
+    "createdAt": "2026-04-14T21:46:47.370Z"
+  },
+  {
+    "employeeId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",
+    "fullName": "Bob Smith",
+    "email": "manager@fdm.com",
+    "passwordHash": "$2a$10$nhrMAlpPuTBFOMeTjVKnv.mpgUvQqmQlYy5QXzOUr.4zs8rjiCi4K",
+    "role": "LINE_MANAGER",
+    "costCentre": "CC-001",
+    "createdAt": "2026-04-14T21:46:47.437Z"
+  },
+  {
+    "employeeId": "0e8a2f33-a465-40df-a8f0-3cb70c604ef9",
+    "fullName": "Carol White",
+    "email": "finance@fdm.com",
+    "passwordHash": "$2a$10$7.6tEjFiykI269iLatNxceR98w2hDE.W3fQLnDOR8nmgPyYwkFVsa",
+    "role": "FINANCE_OFFICER",
+    "costCentre": "CC-FIN",
+    "createdAt": "2026-04-14T21:46:47.503Z"
+  }
+]

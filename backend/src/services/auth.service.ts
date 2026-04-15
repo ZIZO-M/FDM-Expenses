@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
-import prisma from '../lib/prisma';
+import { db } from '../lib/db';
 import { signToken } from '../utils/jwt';
 
 export async function login(email: string, password: string) {
-  const employee = await prisma.employee.findUnique({ where: { email } });
+  const employee = db.employees.byEmail(email);
   if (!employee) throw new Error('Invalid credentials');
 
   const valid = await bcrypt.compare(password, employee.passwordHash);

@@ -1,124 +1,137 @@
-import prisma from '../lib/prisma';
-import { ClaimStatus } from '@prisma/client';
+import { db, newId } from '../lib/db';
 
-const CLAIM_REVIEW_INCLUDE = {
-  employee: { select: { fullName: true, email: true, costCentre: true } },
-  items: { include: { receipts: true } },
-  decisions: {
-    include: { manager: { select: { fullName: true } } },
-    orderBy: { decidedAt: 'desc' as const },
-  },
-  auditLogs: { orderBy: { timestamp: 'desc' as const } },
-};
+function fullClaimForReview(claimId: string) {
+  const claim = db.claims.byId(claimId);
+  if (!claim) return null;
+  const employee = db.employees.byId(claim.employeeId);
+  const items = db.items.byClaim(claimId).map((item) => ({
+    ...item,
+    receipts: db.receipts.byItem(item.itemId),
+  }));
+  const decisions = db.decisions
+    .byClaim(claimId)
+    .sort((a, b) => new Date(b.decidedAt).getTime() - new Date(a.decidedAt).getTime())
+    .map((d) => {
+      const manager = db.employees.byId(d.managerId);
+      return { ...d, manager: manager ? { fullName: manager.fullName } : null };
+    });
+  const auditLogs = db.auditlogs
+    .byClaim(claimId)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  return {
+    ...claim,
+    employee: employee
+      ? { fullName: employee.fullName, email: employee.email, costCentre: employee.costCentre }
+      : null,
+    items,
+    decisions,
+    auditLogs,
+  };
+}
 
 export async function getPendingClaims() {
-  return prisma.expenseClaim.findMany({
-    where: { status: 'SUBMITTED' },
-    include: {
-      employee: { select: { fullName: true, email: true, costCentre: true } },
-      items: true,
-    },
-    orderBy: { submittedAt: 'asc' },
-  });
+  return db.claims
+    .byStatus('SUBMITTED')
+    .sort((a, b) => {
+      const aTime = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+      const bTime = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
+      return aTime - bTime;
+    })
+    .map((claim) => {
+      const employee = db.employees.byId(claim.employeeId);
+      const items = db.items.byClaim(claim.claimId);
+      return {
+        ...claim,
+        employee: employee
+          ? { fullName: employee.fullName, email: employee.email, costCentre: employee.costCentre }
+          : null,
+        items,
+      };
+    });
 }
 
 export async function getClaimForReview(claimId: string) {
-  const claim = await prisma.expenseClaim.findUnique({
-    where: { claimId },
-    include: CLAIM_REVIEW_INCLUDE,
-  });
-  if (!claim) throw new Error('Claim not found');
-  return claim;
+  const result = fullClaimForReview(claimId);
+  if (!result) throw new Error('Claim not found');
+  return result;
 }
 
-export async function approveClaim(
-  claimId: string,
-  managerId: string,
-  comment?: string
-) {
-  const claim = await prisma.expenseClaim.findUnique({ where: { claimId } });
+export async function approveClaim(claimId: string, managerId: string, comment?: string) {
+  const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
   if (claim.status !== 'SUBMITTED') throw new Error('Only submitted claims can be approved');
 
-  return prisma.$transaction([
-    prisma.expenseClaim.update({
-      where: { claimId },
-      data: { status: 'APPROVED', managerComment: comment },
-    }),
-    prisma.approvalDecision.create({
-      data: { claimId, managerId, decisionType: 'APPROVED', comment },
-    }),
-    prisma.auditLog.create({
-      data: {
-        claimId,
-        action: 'APPROVED',
-        oldStatus: 'SUBMITTED' as ClaimStatus,
-        newStatus: 'APPROVED' as ClaimStatus,
-        actorId: managerId,
-        comment,
-      },
-    }),
-  ]);
+  db.claims.update(claimId, { status: 'APPROVED', managerComment: comment ?? null });
+  db.decisions.insert({
+    decisionId: newId(),
+    claimId,
+    managerId,
+    decisionType: 'APPROVED',
+    decidedAt: new Date().toISOString(),
+    comment: comment ?? null,
+  });
+  db.auditlogs.insert({
+    logId: newId(),
+    claimId,
+    actorId: managerId,
+    action: 'APPROVED',
+    oldStatus: 'SUBMITTED',
+    newStatus: 'APPROVED',
+    comment: comment ?? null,
+    timestamp: new Date().toISOString(),
+  });
 }
 
-export async function rejectClaim(
-  claimId: string,
-  managerId: string,
-  comment: string
-) {
-  const claim = await prisma.expenseClaim.findUnique({ where: { claimId } });
+export async function rejectClaim(claimId: string, managerId: string, comment: string) {
+  const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
   if (claim.status !== 'SUBMITTED') throw new Error('Only submitted claims can be rejected');
 
-  return prisma.$transaction([
-    prisma.expenseClaim.update({
-      where: { claimId },
-      data: { status: 'REJECTED', managerComment: comment },
-    }),
-    prisma.approvalDecision.create({
-      data: { claimId, managerId, decisionType: 'REJECTED', comment },
-    }),
-    prisma.auditLog.create({
-      data: {
-        claimId,
-        action: 'REJECTED',
-        oldStatus: 'SUBMITTED' as ClaimStatus,
-        newStatus: 'REJECTED' as ClaimStatus,
-        actorId: managerId,
-        comment,
-      },
-    }),
-  ]);
+  db.claims.update(claimId, { status: 'REJECTED', managerComment: comment });
+  db.decisions.insert({
+    decisionId: newId(),
+    claimId,
+    managerId,
+    decisionType: 'REJECTED',
+    decidedAt: new Date().toISOString(),
+    comment,
+  });
+  db.auditlogs.insert({
+    logId: newId(),
+    claimId,
+    actorId: managerId,
+    action: 'REJECTED',
+    oldStatus: 'SUBMITTED',
+    newStatus: 'REJECTED',
+    comment,
+    timestamp: new Date().toISOString(),
+  });
 }
 
-export async function requestChanges(
-  claimId: string,
-  managerId: string,
-  comment: string
-) {
-  const claim = await prisma.expenseClaim.findUnique({ where: { claimId } });
+export async function requestChanges(claimId: string, managerId: string, comment: string) {
+  const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
   if (claim.status !== 'SUBMITTED') {
     throw new Error('Only submitted claims can be sent back for changes');
   }
 
-  return prisma.$transaction([
-    prisma.expenseClaim.update({
-      where: { claimId },
-      data: { status: 'CHANGES_REQUESTED', managerComment: comment },
-    }),
-    prisma.approvalDecision.create({
-      data: { claimId, managerId, decisionType: 'CHANGES_REQUESTED', comment },
-    }),
-    prisma.auditLog.create({
-      data: {
-        claimId,
-        action: 'CHANGES_REQUESTED',
-        oldStatus: 'SUBMITTED' as ClaimStatus,
-        newStatus: 'CHANGES_REQUESTED' as ClaimStatus,
-        actorId: managerId,
-        comment,
-      },
-    }),
-  ]);
+  db.claims.update(claimId, { status: 'CHANGES_REQUESTED', managerComment: comment });
+  db.decisions.insert({
+    decisionId: newId(),
+    claimId,
+    managerId,
+    decisionType: 'CHANGES_REQUESTED',
+    decidedAt: new Date().toISOString(),
+    comment,
+  });
+  db.auditlogs.insert({
+    logId: newId(),
+    claimId,
+    actorId: managerId,
+    action: 'CHANGES_REQUESTED',
+    oldStatus: 'SUBMITTED',
+    newStatus: 'CHANGES_REQUESTED',
+    comment,
+    timestamp: new Date().toISOString(),
+  });
 }
