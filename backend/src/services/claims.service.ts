@@ -43,6 +43,18 @@ export async function createClaim(
   employeeId: string,
   data: { currency?: string; employeeComment?: string }
 ) {
+  // get employee
+  const employee = db.employees.byId(employeeId);
+
+  if (!employee) {
+    throw new Error('Employee not found');
+  }
+
+  // block finance officers
+  if (employee.role === 'FINANCE_OFFICER') {
+    throw new Error('Finance officers are not allowed to create claims');
+  }
+
   const claim = db.claims.insert({
     claimId: newId(),
     employeeId,
@@ -55,11 +67,14 @@ export async function createClaim(
     createdAt: new Date().toISOString(),
     submittedAt: null,
   });
+
   return claim;
 }
 
 export async function getClaimById(claimId: string, employeeId: string) {
   const claim = db.claims.byId(claimId);
+  // get employee
+
   if (!claim || claim.employeeId !== employeeId) throw new Error('Claim not found');
   return fullClaim(claim);
 }

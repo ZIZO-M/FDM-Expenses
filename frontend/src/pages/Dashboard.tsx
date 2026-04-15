@@ -92,12 +92,18 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="section-title">Quick Actions</div>
       <div className="quick-actions">
-        <Link to="/employee/claims/new" className="quick-action-btn">
-          <span className="qa-icon">➕</span> New Claim
-        </Link>
-        <Link to="/employee/claims" className="quick-action-btn">
-          <span className="qa-icon">📋</span> View My Claims
-        </Link>
+       
+        {user?.role !== 'FINANCE_OFFICER' && (
+          <>
+            <Link to="/employee/claims/new" className="quick-action-btn">
+              <span className="qa-icon">➕</span> New Claim
+            </Link>
+
+            <Link to="/employee/claims" className="quick-action-btn">
+              <span className="qa-icon">📋</span> View My Claims
+            </Link>
+          </>
+        )}
         {(user?.role === 'LINE_MANAGER' || user?.role === 'FINANCE_OFFICER') && (
           <Link to="/manager/claims" className="quick-action-btn">
             <span className="qa-icon">🔍</span> Review Pending
@@ -112,6 +118,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Claims */}
+      { user?.role !== 'FINANCE_OFFICER' && (
       <div className="card">
         <div className="card-header">
           <span className="section-title" style={{ margin: 0 }}>Recent Claims</span>
@@ -161,7 +168,7 @@ export default function Dashboard() {
             </table>
           </div>
         )}
-      </div>
+      </div> )}
     </>
   );
 }

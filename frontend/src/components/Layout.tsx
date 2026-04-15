@@ -56,8 +56,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       location.pathname === path || location.pathname.startsWith(path + '/')
     )?.[1] ?? 'FDM Expenses';
 
-  const showNotifications =
-    user /*&& ['LINE_MANAGER', 'FINANCE_OFFICER'].includes(user.role)*/;
+  const showNotifications = user;
 
   return (
     <div className="app-shell">
