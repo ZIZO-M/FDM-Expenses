@@ -20,16 +20,5 @@
     "currency": "GBP",
     "vatAmount": 20,
     "merchant": "haskjdhkas"
-  },
-  {
-    "itemId": "f52e0dd3-1d29-40c0-95d5-bbd914aec4b2",
-    "claimId": "b3283a8c-3ed3-4864-bfb7-08062559145d",
-    "dateIncurred": "2026-04-15",
-    "category": "Meals",
-    "description": "greggs",
-    "amount": 6,
-    "currency": "GBP",
-    "vatAmount": 6,
-    "merchant": "Tesco"
   }
 ]

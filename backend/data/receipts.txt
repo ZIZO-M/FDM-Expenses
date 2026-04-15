@@ -18,15 +18,5 @@
     "uploadDate": "2026-04-15T16:50:56.888Z",
     "vatNumber": null,
     "totalOnReceipt": null
-  },
-  {
-    "receiptId": "14a870c7-e04e-4692-9428-2000a0246153",
-    "itemId": "f52e0dd3-1d29-40c0-95d5-bbd914aec4b2",
-    "fileName": "download.jpg",
-    "fileType": "image/jpeg",
-    "filePath": "D:\\Webdev\\FDM-Expenses\\backend\\uploads\\1776282664001-881113115-download.jpg",
-    "uploadDate": "2026-04-15T19:51:04.008Z",
-    "vatNumber": null,
-    "totalOnReceipt": null
   }
 ]
