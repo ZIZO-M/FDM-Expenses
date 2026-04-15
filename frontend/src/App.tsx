@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 
 import LoginPage from './pages/auth/LoginPage';
+import Dashboard from './pages/Dashboard';
 import MyClaims from './pages/employee/MyClaims';
 import NewClaim from './pages/employee/NewClaim';
 import EditClaim from './pages/employee/EditClaim';
@@ -17,7 +18,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<Navigate to="/employee/claims" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/unauthorized" element={
         <div style={{ padding: 40, textAlign: 'center' }}>
           <h2>Access Denied</h2>
@@ -25,29 +26,26 @@ function AppRoutes() {
         </div>
       } />
 
-      {/* Employee routes */}
-      <Route path="/employee/claims" element={
-        <ProtectedRoute>
-          <Layout><MyClaims /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/employee/claims/new" element={
-        <ProtectedRoute>
-          <Layout><NewClaim /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/employee/claims/:claimId/edit" element={
-        <ProtectedRoute>
-          <Layout><EditClaim /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/employee/claims/:claimId" element={
-        <ProtectedRoute>
-          <Layout><ClaimDetails /></Layout>
-        </ProtectedRoute>
+      {/* Dashboard */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>
       } />
 
-      {/* Manager routes */}
+      {/* Employee */}
+      <Route path="/employee/claims" element={
+        <ProtectedRoute><Layout><MyClaims /></Layout></ProtectedRoute>
+      } />
+      <Route path="/employee/claims/new" element={
+        <ProtectedRoute><Layout><NewClaim /></Layout></ProtectedRoute>
+      } />
+      <Route path="/employee/claims/:claimId/edit" element={
+        <ProtectedRoute><Layout><EditClaim /></Layout></ProtectedRoute>
+      } />
+      <Route path="/employee/claims/:claimId" element={
+        <ProtectedRoute><Layout><ClaimDetails /></Layout></ProtectedRoute>
+      } />
+
+      {/* Manager */}
       <Route path="/manager/claims" element={
         <ProtectedRoute roles={['LINE_MANAGER', 'FINANCE_OFFICER']}>
           <Layout><PendingClaims /></Layout>
@@ -59,7 +57,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
 
-      {/* Finance routes */}
+      {/* Finance */}
       <Route path="/finance/claims" element={
         <ProtectedRoute roles={['FINANCE_OFFICER']}>
           <Layout><ApprovedClaims /></Layout>
@@ -71,7 +69,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

@@ -4,19 +4,16 @@ import { ExpenseClaim, ClaimStatus } from '../../types';
 import * as api from '../../services/api';
 import StatusBadge from '../../components/StatusBadge';
 
-const ALL_STATUSES: ClaimStatus[] = [
-  'DRAFT',
-  'SUBMITTED',
-  'CHANGES_REQUESTED',
-  'APPROVED',
-  'REJECTED',
-  'PAID',
-  'WITHDRAWN',
-];
+const ALL_STATUSES: ClaimStatus[] = ['DRAFT','SUBMITTED','CHANGES_REQUESTED','APPROVED','REJECTED','PAID','WITHDRAWN'];
+
+const fmt = (n: number, currency: string) =>
+  new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(n);
+const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 export default function MyClaims() {
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
   const [filter, setFilter] = useState<ClaimStatus | 'ALL'>('ALL');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -30,99 +27,77 @@ export default function MyClaims() {
 
   const handleDelete = async (e: React.MouseEvent, claimId: string) => {
     e.stopPropagation();
-
-    if (!window.confirm('Are you sure you want to delete this claim?')) return;
-
+    if (!window.confirm('Delete this draft claim?')) return;
     try {
       await api.deleteClaim(claimId);
       setClaims((prev) => prev.filter((c) => c.claimId !== claimId));
-    } catch {
-      setError('Failed to delete claim');
-    }
+    } catch { setError('Failed to delete claim'); }
   };
 
   const handleWithdraw = async (e: React.MouseEvent, claimId: string) => {
     e.stopPropagation();
-
-    if (!window.confirm('Are you sure you want to withdraw this claim?')) return;
-
+    if (!window.confirm('Withdraw this claim?')) return;
     try {
       await api.withdrawClaim(claimId);
-      setClaims((prev) =>
-        prev.map((c) =>
-          c.claimId === claimId ? { ...c, status: 'WITHDRAWN' } : c
-        )
-      );
-    } catch {
-      setError('Failed to withdraw claim');
-    }
+      setClaims((prev) => prev.map((c) => c.claimId === claimId ? { ...c, status: 'WITHDRAWN' } : c));
+    } catch { setError('Failed to withdraw claim'); }
   };
 
-  const filtered =
-    filter === 'ALL'
-      ? claims
-      : claims.filter((c) => c.status === filter);
-
-  const fmt = (n: number, currency: string) =>
-    new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency,
-    }).format(n);
-
-  const fmtDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-GB');
+  const filtered = claims
+    .filter(c => filter === 'ALL' || c.status === filter)
+    .filter(c => !search || c.claimId.toLowerCase().includes(search.toLowerCase()) || (c.employeeComment || '').toLowerCase().includes(search.toLowerCase()));
 
   return (
     <>
       <div className="top-bar">
-        <h1 className="page-title" style={{ margin: 0 }}>
-          My Expense Claims
-        </h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/employee/claims/new')}
-        >
+        <h1 className="page-title" style={{ margin: 0 }}>My Expense Claims</h1>
+        <button className="btn btn-primary" onClick={() => navigate('/employee/claims/new')}>
           + New Claim
         </button>
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <div className="alert alert-error">⚠️ {error}</div>}
 
       <div className="card">
-        <div className="filter-bar" style={{ marginBottom: '16px' }}>
-          <button
-            className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-            onClick={() => setFilter('ALL')}
-          >
-            All ({claims.length})
-          </button>
-
-          {ALL_STATUSES.map((s) => {
-            const count = claims.filter((c) => c.status === s).length;
-            if (count === 0) return null;
-
-            return (
-              <button
-                key={s}
-                className={`filter-btn ${filter === s ? 'active' : ''}`}
-                onClick={() => setFilter(s)}
-              >
-                {s.replace('_', ' ')} ({count})
-              </button>
-            );
-          })}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+          <div className="filter-bar">
+            <button className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`} onClick={() => setFilter('ALL')}>
+              All ({claims.length})
+            </button>
+            {ALL_STATUSES.map((s) => {
+              const count = claims.filter((c) => c.status === s).length;
+              if (count === 0) return null;
+              return (
+                <button key={s} className={`filter-btn ${filter === s ? 'active' : ''}`} onClick={() => setFilter(s)}>
+                  {s.replace(/_/g, ' ')} ({count})
+                </button>
+              );
+            })}
+          </div>
+          <div className="search-input-wrap">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search claims…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ padding: '7px 12px 7px 32px', borderRadius: 6, border: '1.5px solid var(--grey-200)', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', width: 200 }}
+            />
+          </div>
         </div>
 
         {loading ? (
-          <div className="loading">Loading claims…</div>
+          <div className="loading"><div className="spinner" /> Loading claims…</div>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
             <div className="icon">📋</div>
-            <p>
-              {filter === 'ALL'
-                ? 'No claims yet. Create your first claim.'
-                : `No ${filter.replace('_', ' ').toLowerCase()} claims.`}
-            </p>
+            <h3>{filter === 'ALL' && !search ? 'No claims yet' : 'No matching claims'}</h3>
+            <p>{filter === 'ALL' && !search ? 'Create your first expense claim to get started.' : 'Try adjusting your filters.'}</p>
+            {filter === 'ALL' && !search && (
+              <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => navigate('/employee/claims/new')}>
+                + New Claim
+              </button>
+            )}
           </div>
         ) : (
           <div className="table-wrap">
@@ -137,78 +112,32 @@ export default function MyClaims() {
                   <th>Actions</th>
                 </tr>
               </thead>
-
               <tbody>
                 {filtered.map((claim) => (
-                  <tr
-                    key={claim.claimId}
-                    className="clickable-row"
-                    onClick={() => {
-                      if (
-                        claim.status === 'DRAFT' ||
-                        claim.status === 'CHANGES_REQUESTED'
-                      ) {
-                        navigate(`/employee/claims/${claim.claimId}/edit`);
-                      } else {
-                        navigate(`/employee/claims/${claim.claimId}`);
-                      }
-                    }}
-                  >
+                  <tr key={claim.claimId} className="clickable-row"
+                    onClick={() => navigate(
+                      claim.status === 'DRAFT' || claim.status === 'CHANGES_REQUESTED'
+                        ? `/employee/claims/${claim.claimId}/edit`
+                        : `/employee/claims/${claim.claimId}`
+                    )}>
                     <td>{fmtDate(claim.createdAt)}</td>
-
-                    <td>
-                      {claim.submittedAt
-                        ? fmtDate(claim.submittedAt)
-                        : '—'}
-                    </td>
-
+                    <td>{claim.submittedAt ? fmtDate(claim.submittedAt) : <span className="text-muted">—</span>}</td>
                     <td>{claim.items.length}</td>
-
-                    <td className="amount">
-                      {fmt(claim.totalAmount, claim.currency)}
-                    </td>
-
-                    <td>
-                      <StatusBadge status={claim.status} />
-                    </td>
-
-                    <td>
+                    <td className="amount">{fmt(claim.totalAmount, claim.currency)}</td>
+                    <td><StatusBadge status={claim.status} /></td>
+                    <td onClick={e => e.stopPropagation()}>
                       {claim.status === 'DRAFT' && (
-                        <button
-                          className="btn btn-danger"
-                          onClick={(e) =>
-                            handleDelete(e, claim.claimId)
-                          }
-                        >
+                        <button className="btn btn-danger btn-sm" onClick={(e) => handleDelete(e, claim.claimId)}>
                           Delete
                         </button>
                       )}
-
-                      {(claim.status === 'SUBMITTED' ||
-                        claim.status === 'CHANGES_REQUESTED') && (
-                        <button
-                          className="btn btn-warning"
-                          onClick={(e) =>
-                            handleWithdraw(e, claim.claimId)
-                          }
-                        >
+                      {(claim.status === 'SUBMITTED' || claim.status === 'CHANGES_REQUESTED') && (
+                        <button className="btn btn-warning btn-sm" onClick={(e) => handleWithdraw(e, claim.claimId)}>
                           Withdraw
                         </button>
                       )}
-
-                      {!(
-                        claim.status === 'DRAFT' ||
-                        claim.status === 'SUBMITTED' ||
-                        claim.status === 'CHANGES_REQUESTED'
-                      ) && (
-                        <span
-                          style={{
-                            color: '#1e7a3e',
-                            fontSize: '12px',
-                          }}
-                        >
-                          View →
-                        </span>
+                      {!['DRAFT','SUBMITTED','CHANGES_REQUESTED'].includes(claim.status) && (
+                        <span style={{ color: 'var(--green-600)', fontSize: 12, fontWeight: 600 }}>View →</span>
                       )}
                     </td>
                   </tr>
