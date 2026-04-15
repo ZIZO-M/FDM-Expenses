@@ -117,7 +117,7 @@ export default function NotificationBell() {
             <p style={{ padding: 10 }}>No notifications</p>
           ) : (
             notifications.map(n => (
-              <div className='hi'
+              <div 
                 key={n.notificationId}
                 
                 onClick={() => handleNotificationClick(n)}

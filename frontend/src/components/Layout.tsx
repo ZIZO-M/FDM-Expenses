@@ -57,7 +57,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     )?.[1] ?? 'FDM Expenses';
 
   const showNotifications =
-    user && ['LINE_MANAGER', 'FINANCE_OFFICER'].includes(user.role);
+    user /*&& ['LINE_MANAGER', 'FINANCE_OFFICER'].includes(user.role)*/;
 
   return (
     <div className="app-shell">

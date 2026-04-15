@@ -38,5 +38,25 @@
     "newStatus": "SUBMITTED",
     "comment": null,
     "timestamp": "2026-04-15T16:51:02.976Z"
+  },
+  {
+    "logId": "3d4d6467-2de7-4b95-a5ad-b5dba56447d4",
+    "claimId": "68867bc3-5925-4e9d-98b3-a32836d168b3",
+    "actorId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
+    "action": "SUBMITTED",
+    "oldStatus": "DRAFT",
+    "newStatus": "SUBMITTED",
+    "comment": null,
+    "timestamp": "2026-04-15T23:15:53.471Z"
+  },
+  {
+    "logId": "d904a48e-afb1-4f2c-8129-cbad049814ab",
+    "claimId": "68867bc3-5925-4e9d-98b3-a32836d168b3",
+    "actorId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",
+    "action": "APPROVED",
+    "oldStatus": "SUBMITTED",
+    "newStatus": "APPROVED",
+    "comment": null,
+    "timestamp": "2026-04-15T23:16:07.218Z"
   }
 ]

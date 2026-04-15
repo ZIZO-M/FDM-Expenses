@@ -1,3 +1,18 @@
 [
- 
+  {
+    "notificationId": "3ca2a8a9-d799-44ad-ad4d-a819214fdd99",
+    "recipientId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",
+    "message": "New expense claim submitted by Alice Johnson",
+    "isRead": true,
+    "createdAt": "2026-04-15T23:15:53.473Z",
+    "claimId": "68867bc3-5925-4e9d-98b3-a32836d168b3"
+  },
+  {
+    "notificationId": "317c9c8a-e88c-4f5a-825a-2d2d6a6ce0ea",
+    "recipientId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
+    "message": "Your claim has been approved",
+    "isRead": true,
+    "createdAt": "2026-04-15T23:16:07.218Z",
+    "claimId": "68867bc3-5925-4e9d-98b3-a32836d168b3"
+  }
 ]

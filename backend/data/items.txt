@@ -20,5 +20,16 @@
     "currency": "GBP",
     "vatAmount": 20,
     "merchant": "haskjdhkas"
+  },
+  {
+    "itemId": "0f82fcbe-6139-4fb6-99db-844497381bf7",
+    "claimId": "68867bc3-5925-4e9d-98b3-a32836d168b3",
+    "dateIncurred": "2026-04-15",
+    "category": "Meals",
+    "description": "succulent Chinese meal ",
+    "amount": 20,
+    "currency": "GBP",
+    "vatAmount": 2,
+    "merchant": "Moon cafe"
   }
 ]

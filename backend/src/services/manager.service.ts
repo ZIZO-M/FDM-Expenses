@@ -107,6 +107,16 @@ export async function approveClaim(claimId: string, managerId: string, comment?:
     comment: comment ?? null,
     timestamp: new Date().toISOString(),
   });
+
+
+    db.notifications.insert({
+      notificationId: newId(),
+      recipientId: claim.employeeId, //employee gets notified
+      message: `Your claim has been approved`,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      claimId: claimId, // CRITICAL for frontend navigation
+    });
 }
 
 export async function rejectClaim(claimId: string, managerId: string, comment: string) {
