@@ -1,13 +1,33 @@
 import { db, newId } from '../lib/db';
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function notifyEmployee(
+  employeeId: string,
+  message: string,
+  claimId: string
+) {
+  db.notifications.insert({
+    notificationId: newId(),
+    recipientId: employeeId,
+    message,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+    claimId,
+  });
+}
+
 function fullClaimForReview(claimId: string) {
   const claim = db.claims.byId(claimId);
   if (!claim) return null;
+
   const employee = db.employees.byId(claim.employeeId);
+
   const items = db.items.byClaim(claimId).map((item) => ({
     ...item,
     receipts: db.receipts.byItem(item.itemId),
   }));
+
   const decisions = db.decisions
     .byClaim(claimId)
     .sort((a, b) => new Date(b.decidedAt).getTime() - new Date(a.decidedAt).getTime())
@@ -15,19 +35,27 @@ function fullClaimForReview(claimId: string) {
       const manager = db.employees.byId(d.managerId);
       return { ...d, manager: manager ? { fullName: manager.fullName } : null };
     });
+
   const auditLogs = db.auditlogs
     .byClaim(claimId)
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
   return {
     ...claim,
     employee: employee
-      ? { fullName: employee.fullName, email: employee.email, costCentre: employee.costCentre }
+      ? {
+          fullName: employee.fullName,
+          email: employee.email,
+          costCentre: employee.costCentre,
+        }
       : null,
     items,
     decisions,
     auditLogs,
   };
 }
+
+// ── Services ───────────────────────────────────────────────────────────────
 
 export async function getPendingClaims(managerId: string) {
   return db.claims
@@ -69,11 +97,14 @@ export async function getClaimForReview(claimId: string, managerId: string) {
     throw new Error('Unauthorized');
   }
 
-  const result = fullClaimForReview(claimId);
-  return result;
+  return fullClaimForReview(claimId);
 }
 
-export async function approveClaim(claimId: string, managerId: string, comment?: string) {
+export async function approveClaim(
+  claimId: string,
+  managerId: string,
+  comment?: string
+) {
   const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
 
@@ -86,8 +117,13 @@ export async function approveClaim(claimId: string, managerId: string, comment?:
     throw new Error('Only submitted claims can be approved');
   }
 
-  db.claims.update(claimId, { status: 'APPROVED', managerComment: comment ?? null });
+  // Update claim
+  db.claims.update(claimId, {
+    status: 'APPROVED',
+    managerComment: comment ?? null,
+  });
 
+  // Decision log
   db.decisions.insert({
     decisionId: newId(),
     claimId,
@@ -97,6 +133,7 @@ export async function approveClaim(claimId: string, managerId: string, comment?:
     comment: comment ?? null,
   });
 
+  // Audit log
   db.auditlogs.insert({
     logId: newId(),
     claimId,
@@ -108,27 +145,38 @@ export async function approveClaim(claimId: string, managerId: string, comment?:
     timestamp: new Date().toISOString(),
   });
 
-
-    db.notifications.insert({
-      notificationId: newId(),
-      recipientId: claim.employeeId, //employee gets notified
-      message: `Your claim has been approved`,
-      isRead: false,
-      createdAt: new Date().toISOString(),
-      claimId: claimId, // CRITICAL for frontend navigation
-    });
+  // 🔔 Notification
+  notifyEmployee(
+    claim.employeeId,
+    `Your £${claim.totalAmount} claim has been approved`,
+    claimId
+  );
 }
 
-export async function rejectClaim(claimId: string, managerId: string, comment: string) {
+export async function rejectClaim(
+  claimId: string,
+  managerId: string,
+  comment: string
+) {
   const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
-  if (claim.status !== 'SUBMITTED') throw new Error('Only submitted claims can be rejected');
+
+  if (claim.status !== 'SUBMITTED') {
+    throw new Error('Only submitted claims can be rejected');
+  }
+
   const employee = db.employees.byId(claim.employeeId);
   if (!employee || employee.managerId !== managerId) {
     throw new Error('Unauthorized');
   }
 
-  db.claims.update(claimId, { status: 'REJECTED', managerComment: comment });
+  // Update claim
+  db.claims.update(claimId, {
+    status: 'REJECTED',
+    managerComment: comment,
+  });
+
+  // Decision log
   db.decisions.insert({
     decisionId: newId(),
     claimId,
@@ -137,6 +185,8 @@ export async function rejectClaim(claimId: string, managerId: string, comment: s
     decidedAt: new Date().toISOString(),
     comment,
   });
+
+  // Audit log
   db.auditlogs.insert({
     logId: newId(),
     claimId,
@@ -147,16 +197,39 @@ export async function rejectClaim(claimId: string, managerId: string, comment: s
     comment,
     timestamp: new Date().toISOString(),
   });
+
+  // 🔔 Notification
+  notifyEmployee(
+    claim.employeeId,
+    `Your £${claim.totalAmount} claim was rejected`,
+    claimId
+  );
 }
 
-export async function requestChanges(claimId: string, managerId: string, comment: string) {
+export async function requestChanges(
+  claimId: string,
+  managerId: string,
+  comment: string
+) {
   const claim = db.claims.byId(claimId);
   if (!claim) throw new Error('Claim not found');
+
   if (claim.status !== 'SUBMITTED') {
     throw new Error('Only submitted claims can be sent back for changes');
   }
 
-  db.claims.update(claimId, { status: 'CHANGES_REQUESTED', managerComment: comment });
+  const employee = db.employees.byId(claim.employeeId);
+  if (!employee || employee.managerId !== managerId) {
+    throw new Error('Unauthorized');
+  }
+
+  // Update claim
+  db.claims.update(claimId, {
+    status: 'CHANGES_REQUESTED',
+    managerComment: comment,
+  });
+
+  // Decision log
   db.decisions.insert({
     decisionId: newId(),
     claimId,
@@ -165,6 +238,8 @@ export async function requestChanges(claimId: string, managerId: string, comment
     decidedAt: new Date().toISOString(),
     comment,
   });
+
+  // Audit log
   db.auditlogs.insert({
     logId: newId(),
     claimId,
@@ -175,4 +250,11 @@ export async function requestChanges(claimId: string, managerId: string, comment
     comment,
     timestamp: new Date().toISOString(),
   });
+
+  // 🔔 Notification
+  notifyEmployee(
+    claim.employeeId,
+    `Changes requested for your £${claim.totalAmount} claim`,
+    claimId
+  );
 }

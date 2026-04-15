@@ -22,17 +22,5 @@
     "financeComment": null,
     "createdAt": "2026-04-15T16:50:29.342Z",
     "submittedAt": "2026-04-15T16:51:02.975Z"
-  },
-  {
-    "claimId": "68867bc3-5925-4e9d-98b3-a32836d168b3",
-    "employeeId": "4e4b12e2-d6d0-43d9-9927-998057bcf38d",
-    "status": "APPROVED",
-    "totalAmount": 20,
-    "currency": "GBP",
-    "employeeComment": "moon vist",
-    "managerComment": null,
-    "financeComment": null,
-    "createdAt": "2026-04-15T23:15:08.021Z",
-    "submittedAt": "2026-04-15T23:15:53.471Z"
   }
 ]

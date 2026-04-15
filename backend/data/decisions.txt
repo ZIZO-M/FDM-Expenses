@@ -6,13 +6,5 @@
     "decisionType": "APPROVED",
     "decidedAt": "2026-04-15T12:31:47.332Z",
     "comment": null
-  },
-  {
-    "decisionId": "ad8c454f-10a4-4724-b798-384547e7cd78",
-    "claimId": "68867bc3-5925-4e9d-98b3-a32836d168b3",
-    "managerId": "c883b446-21b7-4914-94f9-7bd145f0aa3a",
-    "decisionType": "APPROVED",
-    "decidedAt": "2026-04-15T23:16:07.217Z",
-    "comment": null
   }
 ]
