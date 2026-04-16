@@ -102,6 +102,9 @@ export async function submitClaim(claimId: string, employeeId: string) {
   if (!['DRAFT', 'CHANGES_REQUESTED'].includes(claim.status)) {
     throw new Error('Cannot submit a claim in its current status');
   }
+  if(claim.status === 'SUBMITTED'){
+    throw new Error('Cannot submit an already submitted claim');
+  }
 
   const items = db.items.byClaim(claimId);
   if (items.length === 0) {
